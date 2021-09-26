@@ -7,5 +7,8 @@ defmodule HelloWeb.Router do
 
   scope "/api", HelloWeb do
     pipe_through :api
+    post "/horoscopes", ApiController, :create
+    get "/horoscopes/:horoscope_id", ApiController, :get
+    post "/horoscopes/:horoscope_id/:question_id", ApiController, :record_answer
   end
 end
