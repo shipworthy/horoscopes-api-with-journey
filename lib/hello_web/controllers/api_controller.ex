@@ -2,10 +2,9 @@ defmodule HelloWeb.ApiController do
   use HelloWeb, :controller
 
   def create(conn, _params) do
-    result = %HelloWeb.ApiReturnValue{
-      horoscope_id: "123",
-      next_question_id: "name"
-    }
+    result =
+      Journey.Process.execute(Hello.HoroscopeItinerary.itinerary())
+      |> HelloWeb.ApiReturnValue.from_execution()
 
     conn
     |> put_status(:created)
@@ -13,17 +12,15 @@ defmodule HelloWeb.ApiController do
   end
 
   def get(conn, %{"horoscope_id" => horoscope_id}) do
-    case horoscope_id do
-      "123" ->
-        result = %HelloWeb.ApiReturnValue{
-          horoscope_id: "123",
-          next_question_id: "name"
-        }
+    case Journey.Execution.load(horoscope_id) do
+      {:error, :no_such_execution} ->
+        conn |> send_resp(404, "not found")
 
-        conn |> json(result)
-
-      _ ->
-        conn |> put_status(404)
+      {:ok, execution} ->
+        json(
+          conn,
+          HelloWeb.ApiReturnValue.from_execution(execution)
+        )
     end
   end
 
@@ -32,12 +29,16 @@ defmodule HelloWeb.ApiController do
         "question_id" => question_id,
         "answer" => answer
       }) do
-    result = %HelloWeb.ApiReturnValue{
-      horoscope_id: horoscope_id,
-      next_question_id: nil,
-      horoscope: "this is a great week to go do things"
-    }
+    {:ok, execution} =
+      Journey.Execution.update_value(
+        horoscope_id,
+        Journey.Utilities.to_existing_atom(question_id),
+        answer
+      )
 
-    conn |> json(result)
+    json(
+      conn,
+      HelloWeb.ApiReturnValue.from_execution(execution)
+    )
   end
 end

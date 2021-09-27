@@ -7,6 +7,8 @@ defmodule Hello.Application do
 
   @impl true
   def start(_type, _args) do
+    Journey.Process.register_process(Hello.HoroscopeItinerary.itinerary())
+
     children = [
       # Start the Telemetry supervisor
       HelloWeb.Telemetry,
