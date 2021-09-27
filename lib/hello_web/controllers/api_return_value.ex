@@ -19,7 +19,6 @@ defmodule HelloWeb.ApiReturnValue do
       execution
       |> Journey.Execution.get_ordered_steps()
       |> Enum.find(fn step ->
-        IO.inspect(step, label: "monkey")
         step.status == :computing
       end)
 

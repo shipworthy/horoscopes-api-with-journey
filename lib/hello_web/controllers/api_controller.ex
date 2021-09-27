@@ -3,7 +3,8 @@ defmodule HelloWeb.ApiController do
 
   def create(conn, _params) do
     result =
-      Journey.Process.execute(Hello.HoroscopeItinerary.itinerary())
+      Hello.HoroscopeItinerary.itinerary()
+      |> Journey.Process.execute()
       |> HelloWeb.ApiReturnValue.from_execution()
 
     conn
@@ -30,8 +31,8 @@ defmodule HelloWeb.ApiController do
         "answer" => answer
       }) do
     {:ok, execution} =
-      Journey.Execution.update_value(
-        horoscope_id,
+      horoscope_id
+      |> Journey.Execution.update_value(
         Journey.Utilities.to_existing_atom(question_id),
         answer
       )
